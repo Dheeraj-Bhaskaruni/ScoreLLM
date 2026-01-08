@@ -1,0 +1,20 @@
+# Core
+pydantic>=2.0.0
+pandas>=2.0.0
+python-dotenv>=1.0.0
+
+# Dashboard
+streamlit>=1.30.0
+plotly>=5.18.0
+
+# HF Hub / Datasets
+datasets>=2.16.0
+huggingface_hub>=0.20.0
+
+# Inference (API agents)
+openai>=1.0.0
+
+# Dev
+pytest>=7.0.0
+ruff>=0.1.0
+mypy>=1.0.0

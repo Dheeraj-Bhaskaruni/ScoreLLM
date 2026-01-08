@@ -1,0 +1,37 @@
+# Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# HF
+.huggingface/
+
+# EvalFlow cache/data (regenerated)
+.evalflow_cache.db
+evalflow.db
+runs/
+ab_comparison_*.json
+simulation_results.json
