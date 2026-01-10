@@ -36,7 +36,7 @@ class RunStatus(str, Enum):
 # ---------------------------------------------------------------------------
 
 class ToolCall(BaseModel):
-    """A single tool invocation by an agent."""
+    """A single tool invocation by an agent, capturing name, args, and raw LLM output."""
     tool_name: str
     arguments: Dict[str, Any] = Field(default_factory=dict)
     raw_output: Optional[str] = None
