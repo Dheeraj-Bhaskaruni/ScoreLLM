@@ -20,7 +20,7 @@ tags:
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Pydantic](https://img.shields.io/badge/Pydantic-v2-green.svg)
-![Tests](https://img.shields.io/badge/Tests-70%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/Tests-101%20passing-brightgreen.svg)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue.svg)
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces)
 
