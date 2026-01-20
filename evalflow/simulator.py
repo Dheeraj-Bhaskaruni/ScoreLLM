@@ -47,7 +47,7 @@ class SimulationEngine:
                     action: ToolCall = agent.act(trace.steps, current_observation)
                 except Exception as e:
                     trace.error = f"Agent Crash: {e}"
-                    logger.error("Agent crashed on scenario %s step %d: %s", scenario.id, i, e)
+                    logger.error("Agent crashed on scenario %s at step %d: %s", scenario.id, i, e)
                     break
 
                 if action.tool_name.lower() == "done":
