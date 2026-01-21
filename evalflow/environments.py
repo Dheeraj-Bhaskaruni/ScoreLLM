@@ -67,6 +67,7 @@ SEARCH_RESPONSES: Dict[str, Dict[str, str]] = {
     },
 }
 
+# Safe math functions exposed to the expression evaluator
 CALCULATE_FUNCTIONS = {
     "mean": lambda *args: sum(args) / len(args) if args else 0,
     "average": lambda *args: sum(args) / len(args) if args else 0,
