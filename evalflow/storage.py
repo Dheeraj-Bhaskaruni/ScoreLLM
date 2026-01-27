@@ -281,3 +281,5 @@ class StorageBackend:
             "dataset_hash": row["dataset_hash"],
             "created_at": row["created_at"],
         }
+
+__all__ = ["StorageBackend"]
