@@ -240,3 +240,5 @@ def _effect_label(d: float) -> str:
     if d < 0.8:
         return "medium"
     return "large"
+
+__all__ = ["welch_t_test", "bootstrap_test", "compare_ab_scores", "format_stat_table", "StatTestResult"]
