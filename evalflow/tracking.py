@@ -23,7 +23,7 @@ from .core import (
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_RUNS_DIR = "runs"
+DEFAULT_RUNS_DIR = "runs"  # Override via ExperimentTracker(runs_dir=...)
 
 
 class _RunEncoder(json.JSONEncoder):
@@ -175,7 +175,7 @@ class ExperimentTracker:
     # Internal
     # ------------------------------------------------------------------
 
-    def _save(self, summary: RunSummary) -> None:
+    def _save(self, summary: RunSummary) -> None:  # type: ignore[override]
         path = self.runs_dir / f"{summary.config.run_id}.json"
         with open(path, "w") as f:
             json.dump(summary.model_dump(), f, indent=2, cls=_RunEncoder)
