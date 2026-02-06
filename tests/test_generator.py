@@ -76,3 +76,21 @@ class TestDomainCatalogue:
             assert "expected_tools" in ec
             assert "difficulty" in ec
             assert ec["difficulty"] in ("easy", "medium", "hard")
+
+
+class TestDatasetHash:
+    def test_hash_deterministic(self):
+        from evalflow.data.generator import DatasetGenerator
+        gen = DatasetGenerator(seed=42)
+        ds1 = gen.generate_synthetic_dataset(size=10)
+        gen2 = DatasetGenerator(seed=42)
+        ds2 = gen2.generate_synthetic_dataset(size=10)
+        assert gen.compute_dataset_hash(ds1) == gen2.compute_dataset_hash(ds2)
+
+    def test_different_data_different_hash(self):
+        from evalflow.data.generator import DatasetGenerator
+        gen1 = DatasetGenerator(seed=42)
+        gen2 = DatasetGenerator(seed=99)
+        ds1 = gen1.generate_synthetic_dataset(size=10)
+        ds2 = gen2.generate_synthetic_dataset(size=10)
+        assert gen1.compute_dataset_hash(ds1) != gen2.compute_dataset_hash(ds2)
