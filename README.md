@@ -157,6 +157,13 @@ tests/                   # 70 tests: unit, integration, end-to-end
 .github/workflows/ci.yml # CI: lint, typecheck, test (3.10-3.12), build
 ```
 
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Run `pytest tests/ -v` before submitting
+4. Open a PR with a clear description
+
 ## License
 
 MIT
