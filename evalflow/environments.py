@@ -126,7 +126,7 @@ class MockEnvironment(Environment):
         elif tool == "done":
             return "Task Completed."
         else:
-            return f"Error: Unknown tool '{action.tool_name}'. Available tools: search, calculate, writer, done."
+            return f"Error: Unrecognized tool '{action.tool_name}'. Available tools: search, calculate, writer, done."
 
     def _handle_search(self, action: ToolCall) -> str:
         query = str(action.arguments.get("query", "")).lower()
