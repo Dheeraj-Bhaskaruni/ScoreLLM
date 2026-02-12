@@ -1,7 +1,11 @@
+
+Requires: pip install evalflow[inference]
 """
 demo.py — Quick demo of the EvalFlow pipeline.
 
 Runs a single scenario end-to-end: agent -> environment -> metrics.
+
+Requires: pip install evalflow[inference]
 """
 from typing import List
 
@@ -12,7 +16,9 @@ from evalflow.simulator import SimulationEngine
 
 
 class MockSearchAgent(Agent):
-    """Simple agent: search -> calculate -> done."""
+    """Simple agent: search -> calculate -> done.
+Requires: pip install evalflow[inference]
+"""
 
     def act(self, history: List[StepResult], current_observation: str) -> ToolCall:
         if len(history) == 0:
@@ -58,3 +64,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# Run: PYTHONPATH=. python3 demo.py
