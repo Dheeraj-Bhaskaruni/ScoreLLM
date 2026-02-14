@@ -26,3 +26,4 @@
 *   **Systems:** AI Evaluation Frameworks, Simulation Harnesses, Experiment Tracking, Async Batch Processing, LLM-as-a-Judge
 *   **Metrics:** Tool Sequence Accuracy (LCS), Rubric Scoring, Multi-dimensional Evaluation, Run Comparison
 *   **Tools:** Python, Pydantic, PyTorch, Hugging Face (Transformers, Hub, Spaces, Inference API), Streamlit, Plotly, pytest, GitHub Actions, asyncio
+- Implemented Welch's t-test with bootstrap fallback for A/B significance testing
