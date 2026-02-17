@@ -9,8 +9,8 @@ Usage:
     # Then upload (uses HF_TOKEN from .env or environment)
     python3 upload_dataset.py --repo-id <your-username>/evalflow-results
 
-    # Or dry-run to inspect the dataset locally
-    python3 upload_dataset.py --dry-run
+    # Or dry-run (local preview without pushing to Hub) to inspect the dataset locally
+    python3 upload_dataset.py --dry-run (local preview without pushing to Hub)
 """
 import argparse
 import json
@@ -85,7 +85,7 @@ def main():
         help="Path to simulation results JSON",
     )
     parser.add_argument(
-        "--dry-run",
+        "--dry-run (local preview without pushing to Hub)",
         action="store_true",
         help="Build dataset locally without pushing to Hub",
     )
@@ -165,3 +165,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# Supports: --dry-run, --repo-id
