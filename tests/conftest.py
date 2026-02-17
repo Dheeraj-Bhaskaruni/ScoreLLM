@@ -1,4 +1,4 @@
-"""Shared fixtures for EvalFlow tests."""
+"""Shared fixtures and test utilities for EvalFlow test suite."""
 from __future__ import annotations
 
 from typing import List
