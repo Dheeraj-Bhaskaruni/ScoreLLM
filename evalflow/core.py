@@ -77,7 +77,7 @@ class Scenario(BaseModel):
 
 
 class SimulationTrace(BaseModel):
-    """Complete record of a single simulation run."""
+    """Complete record of a single agent-environment simulation run."""
     scenario_id: str
     agent_id: str
     start_time: float = Field(default_factory=time.time)
