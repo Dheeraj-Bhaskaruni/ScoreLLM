@@ -94,3 +94,10 @@ class TestDatasetHash:
         ds1 = gen1.generate_synthetic_dataset(size=10)
         ds2 = gen2.generate_synthetic_dataset(size=10)
         assert gen1.compute_dataset_hash(ds1) != gen2.compute_dataset_hash(ds2)
+
+
+class TestEdgeCaseSQLInjection:
+    def test_sql_injection_scenario_exists(self):
+        from evalflow.data.generator import EDGE_CASES
+        names = [e['name'] for e in EDGE_CASES]
+        assert 'SQL injection attempt' in names
