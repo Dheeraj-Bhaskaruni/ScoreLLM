@@ -56,3 +56,4 @@ for i in range(4):
     current_obs = obs
 
 print("\n--- DIAGNOSTIC COMPLETE ---")
+# Diagnostic: validates all imports and basic functionality
