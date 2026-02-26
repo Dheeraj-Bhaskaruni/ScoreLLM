@@ -40,4 +40,4 @@ __all__ = [
     "StepResult",
     "ToolCall",
 ]
-__version__ = "1.1.0"
+__version__ = "1.2.0"
