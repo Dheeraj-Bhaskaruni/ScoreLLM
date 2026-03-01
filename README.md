@@ -66,7 +66,7 @@ tags:
 
 ```bash
 # Install
-pip install -r requirements.txt
+pip install -e ".[all]"
 
 # Run evaluation pipeline (50 scenarios, heuristic judge)
 PYTHONPATH=. python3 run_batch.py
