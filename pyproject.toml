@@ -7,7 +7,7 @@ name = "evalflow"
 version = "1.0.0"
 description = "Agentic AI Evaluation & Simulation Framework"
 readme = "README.md"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
 authors = [
     {name = "Dheeraj Bhaskaruni"},
