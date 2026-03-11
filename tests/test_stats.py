@@ -1,4 +1,4 @@
-"""Tests for evalflow.stats — statistical significance testing."""
+"""Tests for evalflow.stats — Welch t-test, bootstrap, and A/B comparison."""
 import pytest
 from evalflow.stats import (
     StatTestResult,
