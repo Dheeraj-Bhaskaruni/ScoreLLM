@@ -38,7 +38,7 @@ class StorageBackend:
     @contextmanager
     def _get_conn(self):
         """Thread-safe connection context manager."""
-        conn = sqlite3.connect(str(self.db_path), timeout=10)
+        conn = sqlite3.connect(str(self.db_path), timeout=15)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA foreign_keys=ON")
