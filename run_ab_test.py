@@ -217,7 +217,7 @@ def main():
                         help="Judge model ID (should be stronger than both agents)")
     parser.add_argument("--size", type=int, default=15, help="Number of scenarios")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
-    parser.add_argument("--max-steps", type=int, default=10, help="Max steps per scenario")
+    parser.add_argument("--max-steps", type=int, default=10, metavar="N", help="Max steps per scenario")
     parser.add_argument("--runs-dir", type=str, default="runs", help="Experiment tracking directory")
     args = parser.parse_args()
 
