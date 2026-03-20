@@ -5,7 +5,7 @@ This file is required by HF Spaces (Streamlit SDK) — it simply runs the dashbo
 import sys
 import os
 
-# Ensure evalflow package is importable
+# Ensure evalflow is importable when running from HF Spaces
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import and run the dashboard
