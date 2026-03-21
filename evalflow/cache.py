@@ -48,7 +48,7 @@ class ResponseCache:
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_cache_model ON cache(model_id)")
         conn.commit()
-        conn.close()
+        conn.close()  # explicit close for WAL mode
 
     def _make_key(self, model_id: str, messages: list, temperature: float) -> str:
         content = json.dumps({"model": model_id, "messages": messages, "temperature": temperature}, sort_keys=True)
@@ -60,7 +60,7 @@ class ResponseCache:
         row = conn.execute(
             "SELECT response_json, created_at FROM cache WHERE cache_key=?", (key,)
         ).fetchone()
-        conn.close()
+        conn.close()  # explicit close for WAL mode
 
         if row is None:
             self._misses += 1
@@ -82,7 +82,7 @@ class ResponseCache:
             (key, model_id, json.dumps(response), time.time()),
         )
         conn.commit()
-        conn.close()
+        conn.close()  # explicit close for WAL mode
 
     def clear(self, model_id: Optional[str] = None) -> int:
         conn = sqlite3.connect(str(self.db_path))
@@ -92,7 +92,7 @@ class ResponseCache:
             cursor = conn.execute("DELETE FROM cache")
         count = cursor.rowcount
         conn.commit()
-        conn.close()
+        conn.close()  # explicit close for WAL mode
         return count
 
     def evict_expired(self) -> int:
@@ -101,7 +101,7 @@ class ResponseCache:
         cursor = conn.execute("DELETE FROM cache WHERE created_at < ?", (cutoff,))
         count = cursor.rowcount
         conn.commit()
-        conn.close()
+        conn.close()  # explicit close for WAL mode
         return count
 
     @property
@@ -164,3 +164,4 @@ class RateLimiter:
             "total_wait_time_s": round(self._total_wait_time, 2),
             "rate_rpm": self._rate * 60,
         }
+
