@@ -27,3 +27,4 @@
 *   **Metrics:** Tool Sequence Accuracy (LCS), Rubric Scoring, Multi-dimensional Evaluation, Run Comparison
 *   **Tools:** Python, Pydantic, PyTorch, Hugging Face (Transformers, Hub, Spaces, Inference API), Streamlit, Plotly, pytest, GitHub Actions, asyncio
 - Implemented Welch's t-test with bootstrap fallback for A/B significance testing
+- Built disk-backed response cache with TTL expiry to minimize redundant API calls
