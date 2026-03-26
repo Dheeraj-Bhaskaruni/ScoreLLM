@@ -103,7 +103,7 @@ class TestMockEnvironment:
 
         mock_env.reset(simple_scenario)
         result = mock_env.execute(ToolCall(tool_name="hack_system", arguments={}))
-        assert "Unknown tool" in result
+        assert "Unrecognized tool" in result
 
     def test_writer_tool(self, simple_scenario, mock_env):
         from evalflow.core import ToolCall

@@ -29,7 +29,8 @@ class ResponseCache:
     results — useful for re-running evaluations without burning API credits.
     """
 
-    def __init__(self, db_path: str = DEFAULT_CACHE_PATH, ttl_hours: float = 168.0  # 1 week default):
+    def __init__(self, db_path: str = DEFAULT_CACHE_PATH, ttl_hours: float = 168.0):
+        # ttl_hours default: 1 week
         self.db_path = Path(db_path)
         self.ttl_seconds = ttl_hours * 3600
         self._init_db()
