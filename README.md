@@ -1,5 +1,5 @@
 ---
-title: Model Eval Flow
+title: ScoreLLM
 emoji: 📊
 colorFrom: blue
 colorTo: green
@@ -16,7 +16,7 @@ tags:
   - finetuning
 ---
 
-# Model Eval Flow
+# ScoreLLM
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Pydantic](https://img.shields.io/badge/Pydantic-v2-green.svg)
@@ -28,15 +28,15 @@ tags:
 
 I was finetuning language models for lab research and needed a systematic way to compare model variants — base vs. finetuned, different architectures, different sizes — on our domain-specific tasks. Public benchmarks (MMLU, HumanEval) didn't help because they measure general ability, not how a model handles *our* scenarios, edge cases, and safety requirements.
 
-So I built **Model Eval Flow**: a framework that runs multiple candidate models through identical domain-specific scenarios, scores each with an independent judge model (GPT-5-mini), and produces a data-driven comparison with statistical significance testing.
+So I built **ScoreLLM**: a framework that runs multiple candidate models through identical domain-specific scenarios, scores each with an independent judge model (GPT-5-mini), and produces a data-driven comparison with statistical significance testing.
 
 ## What It Does
 
-**Given N candidate models and a set of scenarios, Model Eval Flow tells you which model to deploy.**
+**Given N candidate models and a set of scenarios, ScoreLLM tells you which model to deploy.**
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                     Model Eval Flow Pipeline                   │
+│                     ScoreLLM Pipeline                   │
 │                                                                │
 │   Define Scenarios ──► Run N Models ──► Judge Scores ──► Pick  │
 │   (or auto-generate)   (same tasks)    (GPT-5-mini)    Winner  │

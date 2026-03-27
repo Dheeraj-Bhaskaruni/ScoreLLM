@@ -44,7 +44,7 @@ except ImportError:
 # Page config
 # ---------------------------------------------------------------------------
 
-st.set_page_config(page_title="Model Eval Flow", layout="wide", page_icon="📊")
+st.set_page_config(page_title="ScoreLLM", layout="wide", page_icon="📊")
 
 st.markdown("""
 <style>
@@ -194,7 +194,7 @@ PAGES = {
 def main():
     # --- Sidebar Navigation ---
     with st.sidebar:
-        st.title("Model Eval Flow")
+        st.title("ScoreLLM")
         st.caption("Compare, score, and pick the best LLM")
         st.divider()
 
@@ -208,7 +208,7 @@ def main():
         st.divider()
         with st.expander("About"):
             st.markdown("""
-            **Model Eval Flow** helps you pick the right LLM for your use case.
+            **ScoreLLM** helps you pick the right LLM for your use case.
 
             Built for comparing model variants during finetuning and
             agent development — base vs. finetuned, different architectures,

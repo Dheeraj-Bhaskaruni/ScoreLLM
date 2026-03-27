@@ -1,4 +1,4 @@
-# Resume Bullet Points: Model Eval Flow
+# Resume Bullet Points: ScoreLLM
 
 **Context:** Built during lab research involving finetuning LLMs and developing RFID-based agents. Needed a systematic way to compare model variants (base vs. finetuned, different architectures) on domain-specific tasks before deployment.
 
@@ -6,7 +6,7 @@
 
 ### Option 1: Direct Project Entry
 
-**Project: Model Eval Flow — LLM Model Selection Framework**
+**Project: ScoreLLM — LLM Model Selection Framework**
 
 *   **Built a model selection framework** to compare LLM variants during finetuning and RFID agent development — runs multiple models through identical domain-specific scenarios, scores with an independent judge (GPT-5-mini), and produces statistically rigorous comparison results.
 *   **Designed multi-model evaluation pipeline** comparing 3+ models (Qwen-7B, Llama-3.1-8B, Zephyr-7B) on identical scenarios, producing per-model leaderboards, radar profiles, and per-domain quality breakdowns to identify the best model for each use case.

@@ -255,7 +255,7 @@ def run_pipeline(args: argparse.Namespace) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Model Eval Flow — Batch Evaluation Pipeline")
+    parser = argparse.ArgumentParser(description="ScoreLLM — Batch Evaluation Pipeline")
     parser.add_argument("--size", type=int, default=20, help="Number of scenarios")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--max-steps", type=int, default=10, help="Max steps per scenario")
