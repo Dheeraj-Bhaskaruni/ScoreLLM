@@ -257,8 +257,10 @@ def main():
             logger.error("  Agent model %s — FAILED: %s", model_id, e)
             sys.exit(1)
     try:
+        is_reasoning = args.judge.startswith("gpt-5") or args.judge.startswith("o")
+        ping_kwargs = {"max_completion_tokens": 50} if is_reasoning else {"max_tokens": 5}
         judge_client.chat.completions.create(
-            model=args.judge, messages=[{"role": "user", "content": "ping"}], max_tokens=5,
+            model=args.judge, messages=[{"role": "user", "content": "ping"}], **ping_kwargs,
         )
         logger.info("  Judge model %s — OK", args.judge)
     except Exception as e:

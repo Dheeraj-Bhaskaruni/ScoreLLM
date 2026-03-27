@@ -168,14 +168,18 @@ class RubricMetric(Metric):
     def _llm_judge(self, trace: SimulationTrace, scenario: Scenario) -> MetricResult:
         prompt = _build_judge_prompt(trace, scenario, self.name, self.criteria)
         try:
+            # Reasoning models (gpt-5-*) use max_completion_tokens; others use max_tokens
+            is_reasoning = self._model_id.startswith("gpt-5") or self._model_id.startswith("o")
+            token_kwargs = {"max_completion_tokens": 800} if is_reasoning else {"max_tokens": 200}
+            temp_kwargs = {} if is_reasoning else {"temperature": self._temperature}
             completion = self._client.chat.completions.create(
                 model=self._model_id,
                 messages=[
                     {"role": "system", "content": "You are a precise evaluation judge. Always respond with valid JSON only."},
                     {"role": "user", "content": prompt},
                 ],
-                max_tokens=200,
-                temperature=self._temperature,
+                **token_kwargs,
+                **temp_kwargs,
             )
             raw = completion.choices[0].message.content.strip()
             parsed = _parse_judge_response(raw)
