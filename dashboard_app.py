@@ -44,7 +44,7 @@ except ImportError:
 # Page config
 # ---------------------------------------------------------------------------
 
-st.set_page_config(page_title="EvalFlow Dashboard", layout="wide", page_icon="📊")
+st.set_page_config(page_title="Model Eval Flow", layout="wide", page_icon="📊")
 
 st.markdown("""
 <style>
@@ -194,8 +194,8 @@ PAGES = {
 def main():
     # --- Sidebar Navigation ---
     with st.sidebar:
-        st.title("EvalFlow")
-        st.caption("AI Agent Evaluation Dashboard")
+        st.title("Model Eval Flow")
+        st.caption("Compare, score, and pick the best LLM")
         st.divider()
 
         page = st.radio(
@@ -206,18 +206,19 @@ def main():
         )
 
         st.divider()
-        with st.expander("What is EvalFlow?"):
+        with st.expander("About"):
             st.markdown("""
-            **EvalFlow** helps teams pick the right LLM for their use case.
+            **Model Eval Flow** helps you pick the right LLM for your use case.
 
-            **The problem:** Public benchmarks don't tell you which model
-            works best for *your* domain, edge cases, and safety requirements.
+            Built for comparing model variants during finetuning and
+            agent development — base vs. finetuned, different architectures,
+            different sizes — on domain-specific tasks.
 
             **How it works:**
             1. Define scenarios (or auto-generate them)
             2. Run multiple models on the same scenarios
             3. An independent judge (GPT-5-mini) scores each model
-            4. Compare models with statistical rigor
+            4. Compare with statistical rigor (t-tests, effect sizes)
 
             **The output:** A data-driven answer to *"which model should we deploy?"*
             """)
