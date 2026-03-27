@@ -208,11 +208,18 @@ def main():
         st.divider()
         with st.expander("What is EvalFlow?"):
             st.markdown("""
-            **EvalFlow** evaluates AI agents by:
-            - Generating edge-case scenarios
-            - Running agents in a simulation harness
-            - Scoring with LLM-as-a-Judge (GPT-5-mini)
-            - Tracking experiments for comparison
+            **EvalFlow** helps teams pick the right LLM for their use case.
+
+            **The problem:** Public benchmarks don't tell you which model
+            works best for *your* domain, edge cases, and safety requirements.
+
+            **How it works:**
+            1. Define scenarios (or auto-generate them)
+            2. Run multiple models on the same scenarios
+            3. An independent judge (GPT-5-mini) scores each model
+            4. Compare models with statistical rigor
+
+            **The output:** A data-driven answer to *"which model should we deploy?"*
             """)
 
     # --- Page Content ---
