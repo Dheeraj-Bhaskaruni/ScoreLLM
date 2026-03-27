@@ -35,6 +35,7 @@ evalflow.db
 runs/
 ab_comparison_*.json
 simulation_results.json
+results_*.json
 
 # Pytest
 .pytest_cache/

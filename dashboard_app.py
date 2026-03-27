@@ -53,7 +53,11 @@ st.markdown("""
     div[data-testid="stMetricLabel"] > label > div > p { font-size: 13px; color: #8E8E93; }
     .stDataFrame {border: 1px solid #E5E5EA; border-radius: 8px;}
     h1, h2, h3 {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;}
-    div.stTabs [data-baseweb="tab-list"] button { font-size: 15px; }
+    /* Sidebar nav styling */
+    section[data-testid="stSidebar"] [data-testid="stRadio"] label {
+        font-size: 15px;
+        padding: 4px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -84,8 +88,11 @@ class StochasticAgent(Agent):
 # ---------------------------------------------------------------------------
 
 def load_data():
-    results_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "simulation_results.json")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    results_path = os.path.join(base_dir, "simulation_results.json")
+
     if not os.path.exists(results_path):
+        # Try loading from HF Hub
         try:
             from datasets import load_dataset
             repo_id = os.getenv("HF_DATASET_REPO", "")
@@ -95,10 +102,32 @@ def load_data():
                 return ds.to_list()
         except Exception:
             pass
-        st.error("No simulation_results.json found. Run `PYTHONPATH=. python3 run_batch.py` first.")
+
+        # Try loading individual model result files and merging
+        import glob
+        result_files = sorted(glob.glob(os.path.join(base_dir, "results_*.json")))
+        if result_files:
+            merged = []
+            for fp in result_files:
+                with open(fp) as f:
+                    merged.extend(json.load(f))
+            return merged
+
+        st.error("No results found. Run `PYTHONPATH=. python3 run_batch.py` first.")
         st.stop()
+
     with open(results_path) as f:
         return json.load(f)
+
+
+def _extract_model_name(agent_id: str) -> str:
+    """Extract clean model name from agent_id like 'HFApiAgent(Qwen/Qwen2.5-7B-Instruct:together)'."""
+    if "(" in agent_id and ")" in agent_id:
+        inner = agent_id.split("(", 1)[1].rstrip(")")
+        # Return the model part after last '/' and before ':'
+        short = inner.split("/")[-1].split(":")[0]
+        return short
+    return agent_id
 
 
 def build_dataframe(raw_data):
@@ -117,6 +146,7 @@ def build_dataframe(raw_data):
         rows.append({
             "Scenario ID": scenario["id"],
             "Name": scenario["name"],
+            "Model": _extract_model_name(trace.get("agent_id", "unknown")),
             "Domain": meta.get("domain", "unknown"),
             "Category": meta.get("category", "standard"),
             "Difficulty": meta.get("difficulty", "unknown"),
@@ -153,29 +183,50 @@ def quality_grade(score):
 # Main
 # ---------------------------------------------------------------------------
 
+PAGES = {
+    "Overview": "High-level quality summary, radar chart, score distributions",
+    "Detailed Results": "Per-scenario scores, filters, trace inspector",
+    "Live Lab": "Run two models side-by-side with a live judge",
+    "Run Comparison": "Compare saved experiment runs",
+}
+
+
 def main():
-    st.title("EvalFlow — AI Agent Evaluation Dashboard")
+    # --- Sidebar Navigation ---
+    with st.sidebar:
+        st.title("EvalFlow")
+        st.caption("AI Agent Evaluation Dashboard")
+        st.divider()
 
-    with st.expander("What is EvalFlow?", expanded=False):
-        st.markdown("""
-        **EvalFlow** is an evaluation framework for AI agents. It:
-        - Generates synthetic edge-case scenarios across multiple domains
-        - Runs agents through a controlled simulation environment
-        - Scores outputs with LLM-as-a-Judge (GPT-5-mini) on three rubrics
-        - Tracks experiments for reproducible model comparison
-        """)
+        page = st.radio(
+            "Navigate",
+            list(PAGES.keys()),
+            captions=list(PAGES.values()),
+            label_visibility="collapsed",
+        )
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Overview", "Detailed Results", "Live Lab", "Run Comparison"
-    ])
+        st.divider()
+        with st.expander("What is EvalFlow?"):
+            st.markdown("""
+            **EvalFlow** evaluates AI agents by:
+            - Generating edge-case scenarios
+            - Running agents in a simulation harness
+            - Scoring with LLM-as-a-Judge (GPT-5-mini)
+            - Tracking experiments for comparison
+            """)
 
-    with tab1:
+    # --- Page Content ---
+    if page == "Overview":
+        st.title("Overview")
         render_overview()
-    with tab2:
+    elif page == "Detailed Results":
+        st.title("Detailed Results")
         render_detailed_results()
-    with tab3:
+    elif page == "Live Lab":
+        st.title("Live Lab")
         render_live_lab()
-    with tab4:
+    elif page == "Run Comparison":
+        st.title("Run Comparison")
         render_run_comparison()
 
 
@@ -183,212 +234,202 @@ def main():
 # Tab 1: Overview
 # ---------------------------------------------------------------------------
 
+MODEL_COLORS = ["#007AFF", "#FF9500", "#34C759", "#FF3B30", "#AF52DE", "#5AC8FA"]
+
+
 def render_overview():
     raw_data = load_data()
     df = build_dataframe(raw_data)
+    models = sorted(df["Model"].unique())
+    n_models = len(models)
 
     # --- Executive Summary ---
-    overall_quality = df["Overall Quality"].mean()
-    grade = quality_grade(overall_quality)
-    n_scenarios = len(df)
+    best_model = df.groupby("Model")["Overall Quality"].mean().idxmax()
+    best_score = df.groupby("Model")["Overall Quality"].mean().max()
+    n_scenarios_per_model = len(df) // max(n_models, 1)
     n_domains = df["Domain"].nunique()
-    worst_domain = df.groupby("Domain")["Overall Quality"].mean().idxmin()
-    best_domain = df.groupby("Domain")["Overall Quality"].mean().idxmax()
 
     st.markdown(
-        f"**Executive Summary:** Evaluated **{n_scenarios} scenarios** across "
-        f"**{n_domains} domains**. Overall quality grade: **{grade}** ({overall_quality:.2f}/5). "
-        f"Strongest domain: *{best_domain}*. Weakest: *{worst_domain}*."
+        f"**Executive Summary:** Compared **{n_models} models** on **{n_scenarios_per_model} scenarios** across "
+        f"**{n_domains} domains**, scored by GPT-5-mini judge. "
+        f"Best performer: **{best_model}** ({best_score:.2f}/5)."
     )
 
     st.divider()
 
-    # --- Hero KPIs ---
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric(
-        "Overall Quality",
-        f"{overall_quality:.2f}/5",
-        help="Average of Helpfulness + Safety + Tool Coherence across all scenarios (scored by GPT-5-mini judge)"
-    )
-    col2.metric(
-        "Helpfulness",
-        f"{df['Helpfulness'].mean():.2f}/5",
-        help="Did the agent answer the question accurately and completely? (1=poor, 5=excellent)"
-    )
-    col3.metric(
-        "Safety",
-        f"{df['Safety'].mean():.2f}/5",
-        help="Did the agent avoid harmful, misleading, or inappropriate content? (1=unsafe, 5=fully safe)"
-    )
-    col4.metric(
-        "Tool Coherence",
-        f"{df['Tool Coherence'].mean():.2f}/5",
-        help="Did the agent use the right tools in a logical order? (1=chaotic, 5=perfect sequence)"
-    )
-    col5.metric(
-        "Avg Steps",
-        f"{df['Steps'].mean():.1f}",
-        help="Average number of tool calls per scenario. Lower is more efficient, but too few may mean incomplete work."
+    # --- Model Leaderboard ---
+    st.subheader("Model Leaderboard")
+    st.caption("Models ranked by overall quality (average of Helpfulness + Safety + Tool Coherence)")
+
+    leaderboard = df.groupby("Model").agg(
+        Helpfulness=("Helpfulness", "mean"),
+        Safety=("Safety", "mean"),
+        Tool_Coherence=("Tool Coherence", "mean"),
+        Overall=("Overall Quality", "mean"),
+        Avg_Steps=("Steps", "mean"),
+        Scenarios=("Name", "count"),
+    ).round(2).sort_values("Overall", ascending=False).reset_index()
+    leaderboard.index = range(1, len(leaderboard) + 1)
+    leaderboard.index.name = "Rank"
+    leaderboard.columns = ["Model", "Helpfulness", "Safety", "Tool Coherence", "Overall Quality", "Avg Steps", "Scenarios"]
+
+    st.dataframe(
+        leaderboard.style.format({
+            "Helpfulness": "{:.2f}",
+            "Safety": "{:.2f}",
+            "Tool Coherence": "{:.2f}",
+            "Overall Quality": "{:.2f}",
+            "Avg Steps": "{:.1f}",
+        }).background_gradient(subset=["Overall Quality"], cmap="RdYlGn", vmin=1, vmax=5),
+        use_container_width=True,
     )
 
     st.divider()
 
-    # --- Row 1: Radar Chart + Score Distribution ---
+    # --- Row 1: Radar Comparison + Overall Quality Bar ---
     c1, c2 = st.columns(2)
 
     with c1:
-        st.subheader("Quality Profile")
-        st.caption("Multi-dimensional view of agent capability across all evaluation rubrics")
+        st.subheader("Quality Profile Comparison")
+        st.caption("Overlaid radar charts — shows each model's strengths and weaknesses at a glance")
 
-        # Radar chart
         categories = ["Helpfulness", "Safety", "Tool Coherence"]
-        values = [df[c].mean() for c in categories]
-        values_closed = values + [values[0]]
-        cats_closed = categories + [categories[0]]
-
         fig = go.Figure()
-        fig.add_trace(go.Scatterpolar(
-            r=values_closed,
-            theta=cats_closed,
-            fill="toself",
-            fillcolor="rgba(0, 122, 255, 0.15)",
-            line=dict(color="#007AFF", width=2),
-            name="Agent Score",
-        ))
+        for i, model in enumerate(models):
+            model_df = df[df["Model"] == model]
+            values = [model_df[c].mean() for c in categories]
+            values_closed = values + [values[0]]
+            cats_closed = categories + [categories[0]]
+            color = MODEL_COLORS[i % len(MODEL_COLORS)]
+            fig.add_trace(go.Scatterpolar(
+                r=values_closed, theta=cats_closed,
+                fill="toself",
+                fillcolor=color.replace(")", ", 0.1)").replace("rgb", "rgba") if "rgb" in color else f"rgba({int(color[1:3],16)},{int(color[3:5],16)},{int(color[5:7],16)},0.1)",
+                line=dict(color=color, width=2),
+                name=model,
+            ))
         fig.update_layout(
             polar=dict(
                 radialaxis=dict(visible=True, range=[0, 5], tickvals=[1, 2, 3, 4, 5]),
                 angularaxis=dict(tickfont=dict(size=13)),
             ),
-            showlegend=False,
-            height=350,
-            margin=dict(t=30, b=30, l=60, r=60),
+            height=380, margin=dict(t=40, b=30, l=60, r=60),
+            legend=dict(orientation="h", y=-0.15),
         )
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.subheader("Score Distribution")
-        st.caption("How scores are spread across scenarios — wider spread means less consistent performance")
+        st.subheader("Overall Quality by Model")
+        st.caption("Side-by-side comparison of average quality scores")
 
-        dist_data = pd.melt(
-            df[["Helpfulness", "Safety", "Tool Coherence"]],
-            var_name="Metric", value_name="Score"
+        model_quality = df.groupby("Model")["Overall Quality"].mean().reset_index()
+        model_quality = model_quality.sort_values("Overall Quality", ascending=True)
+        fig = px.bar(
+            model_quality, x="Overall Quality", y="Model", orientation="h",
+            range_x=[0, 5], color="Model",
+            color_discrete_sequence=MODEL_COLORS,
         )
-        fig = px.histogram(
-            dist_data, x="Score", color="Metric", barmode="overlay",
-            nbins=10, range_x=[0, 5.5], opacity=0.65,
-            color_discrete_map={
-                "Helpfulness": "#007AFF",
-                "Safety": "#34C759",
-                "Tool Coherence": "#FF9500",
-            },
-            labels={"Score": "Judge Score (1-5)", "count": "Number of Scenarios"},
-        )
-        fig.update_layout(height=350, margin=dict(t=30, b=30))
+        fig.update_layout(height=380, margin=dict(t=30, b=30), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
-    # --- Row 2: Quality by Domain + Quality by Difficulty ---
+    # --- Row 2: Per-Metric Grouped Comparison ---
+    st.subheader("Metric Breakdown by Model")
+    st.caption("How each model performs on individual rubrics — helps identify specific strengths and gaps")
+
+    metric_data = df.groupby("Model")[["Helpfulness", "Safety", "Tool Coherence"]].mean().reset_index()
+    metric_melted = pd.melt(metric_data, id_vars="Model", var_name="Metric", value_name="Score")
+    fig = px.bar(
+        metric_melted, x="Metric", y="Score", color="Model",
+        barmode="group", range_y=[0, 5],
+        color_discrete_sequence=MODEL_COLORS,
+    )
+    fig.update_layout(height=380, margin=dict(t=30, b=30), legend=dict(orientation="h", y=-0.12))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # --- Row 3: Quality by Domain (per model) + Quality by Difficulty (per model) ---
     c3, c4 = st.columns(2)
 
     with c3:
         st.subheader("Quality by Domain")
-        st.caption("Average judge scores grouped by topic area — identifies domain-specific weaknesses")
+        st.caption("Which model performs best in each topic area?")
 
-        domain_metrics = df.groupby("Domain")[["Helpfulness", "Safety", "Tool Coherence"]].mean().reset_index()
-        domain_melted = pd.melt(domain_metrics, id_vars="Domain", var_name="Metric", value_name="Score")
+        domain_model = df.groupby(["Domain", "Model"])["Overall Quality"].mean().reset_index()
         fig = px.bar(
-            domain_melted, x="Domain", y="Score", color="Metric",
+            domain_model, x="Domain", y="Overall Quality", color="Model",
             barmode="group", range_y=[0, 5],
-            color_discrete_map={
-                "Helpfulness": "#007AFF",
-                "Safety": "#34C759",
-                "Tool Coherence": "#FF9500",
-            },
+            color_discrete_sequence=MODEL_COLORS,
         )
         fig.update_layout(height=380, margin=dict(t=30, b=30), legend=dict(orientation="h", y=-0.15))
         st.plotly_chart(fig, use_container_width=True)
 
     with c4:
         st.subheader("Quality by Difficulty")
-        st.caption("Does the agent struggle more with harder tasks? Grouped by easy/medium/hard")
+        st.caption("Which model handles hard scenarios best?")
 
-        diff_metrics = df.groupby("Difficulty")[["Helpfulness", "Safety", "Tool Coherence"]].mean().reset_index()
-        # Order difficulties
+        diff_model = df.groupby(["Difficulty", "Model"])["Overall Quality"].mean().reset_index()
         diff_order = {"easy": 0, "medium": 1, "hard": 2}
-        diff_metrics["order"] = diff_metrics["Difficulty"].map(diff_order).fillna(3)
-        diff_metrics = diff_metrics.sort_values("order").drop(columns="order")
-        diff_melted = pd.melt(diff_metrics, id_vars="Difficulty", var_name="Metric", value_name="Score")
+        diff_model["order"] = diff_model["Difficulty"].map(diff_order).fillna(3)
+        diff_model = diff_model.sort_values("order").drop(columns="order")
         fig = px.bar(
-            diff_melted, x="Difficulty", y="Score", color="Metric",
+            diff_model, x="Difficulty", y="Overall Quality", color="Model",
             barmode="group", range_y=[0, 5],
-            color_discrete_map={
-                "Helpfulness": "#007AFF",
-                "Safety": "#34C759",
-                "Tool Coherence": "#FF9500",
-            },
+            color_discrete_sequence=MODEL_COLORS,
         )
         fig.update_layout(height=380, margin=dict(t=30, b=30), legend=dict(orientation="h", y=-0.15))
         st.plotly_chart(fig, use_container_width=True)
 
-    # --- Row 3: Scatter + Category Breakdown ---
+    # --- Row 4: Scatter + Efficiency ---
     c5, c6 = st.columns(2)
 
     with c5:
         st.subheader("Safety vs Helpfulness")
-        st.caption("Each dot is one scenario. Top-right = high quality and safe. Bottom-left = needs improvement.")
+        st.caption("Each dot is one scenario, colored by model. Top-right = best.")
         fig = px.scatter(
-            df, x="Helpfulness", y="Safety", color="Domain", size="Steps",
-            hover_data=["Name", "Category", "Difficulty"],
+            df, x="Helpfulness", y="Safety", color="Model",
+            symbol="Model",
+            hover_data=["Name", "Domain", "Difficulty"],
             range_x=[0, 5.5], range_y=[0, 5.5],
-            labels={"Helpfulness": "Helpfulness (1-5)", "Safety": "Safety (1-5)"},
+            color_discrete_sequence=MODEL_COLORS,
         )
-        # Add quadrant lines at 3.0
         fig.add_hline(y=3, line_dash="dot", line_color="gray", opacity=0.4)
         fig.add_vline(x=3, line_dash="dot", line_color="gray", opacity=0.4)
         fig.update_layout(height=380, margin=dict(t=30, b=30))
         st.plotly_chart(fig, use_container_width=True)
 
     with c6:
-        st.subheader("Test Coverage")
-        st.caption("Distribution of scenario categories — a healthy eval suite has diverse test types")
-        cat_counts = df["Category"].value_counts().reset_index()
-        cat_counts.columns = ["Category", "Count"]
-        fig = px.pie(
-            cat_counts, names="Category", values="Count", hole=0.45,
-            color_discrete_sequence=px.colors.qualitative.Set2,
+        st.subheader("Efficiency: Steps vs Quality")
+        st.caption("Does using more tools lead to better answers? Compared across models.")
+        efficiency = df.groupby("Model").agg(
+            Steps=("Steps", "mean"), Quality=("Overall Quality", "mean")
+        ).reset_index()
+        fig = px.scatter(
+            efficiency, x="Steps", y="Quality", color="Model",
+            size=[40] * len(efficiency), text="Model",
+            range_y=[0, 5],
+            color_discrete_sequence=MODEL_COLORS,
+            labels={"Steps": "Avg Steps", "Quality": "Avg Quality"},
         )
-        fig.update_traces(textinfo="label+percent", textposition="outside")
+        fig.update_traces(textposition="top center")
         fig.update_layout(height=380, margin=dict(t=30, b=30), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
-    # --- Steps efficiency ---
-    st.subheader("Agent Efficiency")
-    st.caption("Fewer steps to reach a correct answer = more efficient agent")
-    c7, c8 = st.columns(2)
-
-    with c7:
-        fig = px.histogram(
-            df, x="Steps", nbins=8,
-            labels={"Steps": "Number of Tool Calls", "count": "Scenarios"},
-            color_discrete_sequence=["#007AFF"],
-        )
-        fig.update_layout(height=300, margin=dict(t=20, b=30))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with c8:
-        step_vs_quality = df.groupby("Steps")["Overall Quality"].mean().reset_index()
-        fig = px.line(
-            step_vs_quality, x="Steps", y="Overall Quality",
-            markers=True,
-            labels={"Steps": "Number of Tool Calls", "Overall Quality": "Avg Quality Score"},
-        )
-        fig.update_traces(line_color="#007AFF")
-        fig.update_layout(height=300, margin=dict(t=20, b=30), yaxis=dict(range=[0, 5]))
-        st.plotly_chart(fig, use_container_width=True)
+    # --- Test Coverage ---
+    st.subheader("Test Coverage")
+    st.caption("Distribution of scenario categories in the evaluation suite")
+    # Use per-model scenario count (divide by n_models to get unique scenarios)
+    cat_counts = df.drop_duplicates(subset=["Name"])["Category"].value_counts().reset_index()
+    cat_counts.columns = ["Category", "Count"]
+    fig = px.pie(
+        cat_counts, names="Category", values="Count", hole=0.45,
+        color_discrete_sequence=px.colors.qualitative.Set2,
+    )
+    fig.update_traces(textinfo="label+percent", textposition="outside")
+    fig.update_layout(height=350, margin=dict(t=30, b=30), showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
 
     # --- Export ---
     st.divider()
-    export_cols = ["Name", "Domain", "Category", "Difficulty", "Helpfulness", "Safety", "Tool Coherence", "Overall Quality", "Steps"]
+    export_cols = ["Name", "Model", "Domain", "Category", "Difficulty", "Helpfulness", "Safety", "Tool Coherence", "Overall Quality", "Steps"]
     csv = df[export_cols].to_csv(index=False)
     st.download_button(
         "Download Results (CSV)",
@@ -407,15 +448,18 @@ def render_detailed_results():
 
     # --- Filters ---
     st.subheader("Filters")
-    fc1, fc2, fc3 = st.columns(3)
+    fc1, fc2, fc3, fc4 = st.columns(4)
     with fc1:
-        domain_filter = st.multiselect("Domain", df["Domain"].unique(), default=list(df["Domain"].unique()))
+        model_filter = st.multiselect("Model", df["Model"].unique(), default=list(df["Model"].unique()))
     with fc2:
-        difficulty_filter = st.multiselect("Difficulty", df["Difficulty"].unique(), default=list(df["Difficulty"].unique()))
+        domain_filter = st.multiselect("Domain", df["Domain"].unique(), default=list(df["Domain"].unique()))
     with fc3:
+        difficulty_filter = st.multiselect("Difficulty", df["Difficulty"].unique(), default=list(df["Difficulty"].unique()))
+    with fc4:
         min_quality = st.slider("Minimum Overall Quality", 0.0, 5.0, 0.0, 0.5)
 
     filtered = df[
+        (df["Model"].isin(model_filter)) &
         (df["Domain"].isin(domain_filter)) &
         (df["Difficulty"].isin(difficulty_filter)) &
         (df["Overall Quality"] >= min_quality)
@@ -425,7 +469,7 @@ def render_detailed_results():
 
     # --- Scores Table ---
     st.subheader("All Scenario Scores")
-    display_cols = ["Name", "Domain", "Category", "Difficulty",
+    display_cols = ["Name", "Model", "Domain", "Category", "Difficulty",
                     "Helpfulness", "Safety", "Tool Coherence", "Overall Quality", "Steps"]
     st.dataframe(
         filtered[display_cols].style.format({
@@ -475,6 +519,7 @@ def render_detailed_results():
         cl, cr = st.columns([1, 2])
         with cl:
             # Score card
+            st.markdown(f"**Model:** `{run['Model']}`")
             for metric in ["Helpfulness", "Safety", "Tool Coherence"]:
                 val = run[metric]
                 color = "green" if val >= 4 else ("orange" if val >= 3 else "red")
@@ -501,7 +546,6 @@ def render_detailed_results():
 # ---------------------------------------------------------------------------
 
 def render_live_lab():
-    st.header("Live Lab: A/B Model Comparison")
     st.caption("Run two models side-by-side on the same scenario, scored by an independent judge model")
 
     AVAILABLE_MODELS = [
@@ -769,8 +813,7 @@ def render_live_lab():
 # ---------------------------------------------------------------------------
 
 def render_run_comparison():
-    st.header("Experiment Run Comparison")
-    st.caption("Compare evaluation runs from the experiment tracker")
+    st.caption("Compare saved evaluation runs from the experiment tracker")
 
     tracker = ExperimentTracker()
     runs = tracker.list_runs()

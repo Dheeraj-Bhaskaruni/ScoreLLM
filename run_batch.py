@@ -262,12 +262,35 @@ def main():
     parser.add_argument("--output", type=str, default="simulation_results.json", help="Output JSON path")
     parser.add_argument("--runs-dir", type=str, default="runs", help="Experiment tracking directory")
     parser.add_argument("--model", type=str, default="Qwen/Qwen2.5-7B-Instruct:together", help="HF model ID for the agent")
+    parser.add_argument("--models", type=str, nargs="+", default=None,
+                        help="Run multiple models on the same scenarios and merge results. "
+                             "Example: --models Qwen/Qwen2.5-7B-Instruct:together meta-llama/Llama-3.1-8B-Instruct")
     parser.add_argument("--judge-model", type=str, default="Qwen/Qwen2.5-7B-Instruct:together", help="Model ID for LLM judge")
     parser.add_argument("--mock", action="store_true", help="Force mock agents (skip real LLM even if HF_TOKEN exists)")
     parser.add_argument("--latency-ms", type=float, default=0.0, help="Simulated env latency (ms)")
     parser.add_argument("--env-failure-rate", type=float, default=0.0, help="Env stochastic failure rate (0-1)")
     args = parser.parse_args()
-    run_pipeline(args)
+
+    if args.models:
+        # Multi-model mode: run each model sequentially, merge results
+        all_results = []
+        for model_id in args.models:
+            logger.info("=" * 60)
+            logger.info("Running model: %s", model_id)
+            logger.info("=" * 60)
+            model_args = argparse.Namespace(**vars(args))
+            model_args.model = model_id
+            safe_name = model_id.split("/")[-1].split(":")[0].lower().replace(".", "")
+            model_args.output = f"results_{safe_name}.json"
+            run_pipeline(model_args)
+            with open(model_args.output) as f:
+                all_results.extend(json.load(f))
+
+        with open(args.output, "w") as f:
+            json.dump(all_results, f, indent=2)
+        logger.info("Merged %d results from %d models → %s", len(all_results), len(args.models), args.output)
+    else:
+        run_pipeline(args)
 
 
 if __name__ == "__main__":
