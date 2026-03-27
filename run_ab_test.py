@@ -6,9 +6,9 @@ Runs two different LLM agents (baseline vs candidate) on the SAME set of
 scenarios, scores both with a SEPARATE stronger judge model, and produces
 a side-by-side comparison with a deploy/reject recommendation.
 
-This is how real production model evaluation works at companies like Apple,
-Google, and OpenAI — you never ship a model without comparing it against
-the current production version on structured benchmarks.
+This is how production model evaluation works — you never ship a model
+without comparing it against the current production version on structured
+benchmarks with statistical rigor.
 
 Usage:
     # Compare two models (judge defaults to a separate model)

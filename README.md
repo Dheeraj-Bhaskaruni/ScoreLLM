@@ -1,6 +1,6 @@
 ---
 title: EvalFlow - LLM Model Selection Framework
-emoji: 🍎
+emoji: 📊
 colorFrom: blue
 colorTo: green
 sdk: streamlit

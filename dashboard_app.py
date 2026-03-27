@@ -44,7 +44,7 @@ except ImportError:
 # Page config
 # ---------------------------------------------------------------------------
 
-st.set_page_config(page_title="EvalFlow Dashboard", layout="wide", page_icon="🍎")
+st.set_page_config(page_title="EvalFlow Dashboard", layout="wide", page_icon="📊")
 
 st.markdown("""
 <style>
