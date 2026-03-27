@@ -176,7 +176,7 @@ def run_pipeline(args: argparse.Namespace) -> None:
     # ── 5. Evaluate ───────────────────────────────────────────────────────
     logger.info("Evaluating traces...")
 
-    # Judge client — prefer OpenAI GPT-4 if key available, else use HF client
+    # Judge client — prefer OpenAI if key available, else use HF client
     openai_key = os.getenv("OPENAI_API_KEY")
     judge_client = None
     if openai_key and args.judge_model.startswith("gpt-"):
