@@ -827,7 +827,7 @@ def render_run_comparison():
     runs = tracker.list_runs()
 
     if not runs:
-        st.info("No runs found. Run `PYTHONPATH=. python3 run_batch.py` to create evaluation runs.")
+        st.info("No saved runs yet. This page compares experiment runs created locally via the CLI. Use the **Overview** tab to see pre-computed model comparisons, or **Live Lab** to run a live A/B test.")
         return
 
     run_options = {f"{r['run_id']} ({r['agent_id']}, {r['status']})": r["run_id"] for r in runs}
