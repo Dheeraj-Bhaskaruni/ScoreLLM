@@ -1,6 +1,4 @@
 """Tests for evalflow.tracking — experiment tracker."""
-import json
-import tempfile
 
 import pytest
 
@@ -23,11 +21,17 @@ def tmp_tracker(tmp_path):
 @pytest.fixture
 def sample_results():
     scenario = Scenario(
-        id="s1", name="Test", description="Test", initial_context="Test",
+        id="s1",
+        name="Test",
+        description="Test",
+        initial_context="Test",
         expected_tool_sequence=["search"],
     )
     trace = SimulationTrace(
-        scenario_id="s1", agent_id="test", start_time=100.0, end_time=102.0,
+        scenario_id="s1",
+        agent_id="test",
+        start_time=100.0,
+        end_time=102.0,
         final_output="answer",
     )
     return [
@@ -89,7 +93,9 @@ class TestExperimentTracker:
         results_a = [
             EvaluationResult(
                 scenario=Scenario(id="s1", name="T", description="T", initial_context="T"),
-                trace=SimulationTrace(scenario_id="s1", agent_id="baseline", start_time=0, end_time=1, final_output="a"),
+                trace=SimulationTrace(
+                    scenario_id="s1", agent_id="baseline", start_time=0, end_time=1, final_output="a"
+                ),
                 metrics={"SuccessRate": MetricResult(name="SuccessRate", score=0.5)},
             )
         ]
@@ -101,7 +107,9 @@ class TestExperimentTracker:
         results_b = [
             EvaluationResult(
                 scenario=Scenario(id="s1", name="T", description="T", initial_context="T"),
-                trace=SimulationTrace(scenario_id="s1", agent_id="candidate", start_time=0, end_time=1, final_output="b"),
+                trace=SimulationTrace(
+                    scenario_id="s1", agent_id="candidate", start_time=0, end_time=1, final_output="b"
+                ),
                 metrics={"SuccessRate": MetricResult(name="SuccessRate", score=1.0)},
             )
         ]
@@ -127,7 +135,9 @@ class TestExperimentTracker:
         results_b = [
             EvaluationResult(
                 scenario=Scenario(id="s1", name="T", description="T", initial_context="T"),
-                trace=SimulationTrace(scenario_id="s1", agent_id="bad", start_time=0, end_time=1, final_output=None, error="crash"),
+                trace=SimulationTrace(
+                    scenario_id="s1", agent_id="bad", start_time=0, end_time=1, final_output=None, error="crash"
+                ),
                 metrics={"SuccessRate": MetricResult(name="SuccessRate", score=0.0)},
             )
         ]
@@ -142,7 +152,9 @@ class TestExperimentTracker:
         results = [
             EvaluationResult(
                 scenario=Scenario(id=f"s{i}", name="T", description="T", initial_context="T"),
-                trace=SimulationTrace(scenario_id=f"s{i}", agent_id="test", start_time=0, end_time=1, final_output="ok"),
+                trace=SimulationTrace(
+                    scenario_id=f"s{i}", agent_id="test", start_time=0, end_time=1, final_output="ok"
+                ),
                 metrics={"SuccessRate": MetricResult(name="SuccessRate", score=float(i % 2))},
             )
             for i in range(4)

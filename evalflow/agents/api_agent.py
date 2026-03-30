@@ -4,12 +4,13 @@ evalflow.agents.api_agent — HF Inference API agent (OpenAI-compatible).
 Supports both synchronous and asynchronous operation for use with
 SimulationEngine and AsyncSimulationEngine respectively.
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from ..core import Agent, AsyncAgent, StepResult, ToolCall
 
@@ -92,12 +93,13 @@ def _extract_json_args(text: str, start_idx: int) -> Dict[str, Any]:
         elif text[i] == "}":
             brace_count -= 1
         if brace_count == 0:
-            json_text = text[open_idx:i + 1]
+            json_text = text[open_idx : i + 1]
             try:
                 return json.loads(json_text)
             except json.JSONDecodeError:
                 try:
                     import ast
+
                     return ast.literal_eval(json_text)
                 except (ValueError, SyntaxError):
                     return {}
@@ -139,6 +141,7 @@ def _build_messages(history: List[StepResult], current_observation: str) -> List
 # Synchronous agent
 # ---------------------------------------------------------------------------
 
+
 class HFApiAgent(Agent):
     """Synchronous agent using HF Inference API via OpenAI-compatible client."""
 
@@ -179,6 +182,7 @@ class HFApiAgent(Agent):
 # ---------------------------------------------------------------------------
 # Async agent
 # ---------------------------------------------------------------------------
+
 
 class AsyncHFApiAgent(AsyncAgent):
     """Async agent for use with AsyncSimulationEngine."""

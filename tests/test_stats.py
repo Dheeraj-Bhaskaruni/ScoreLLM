@@ -1,5 +1,5 @@
 """Tests for evalflow.stats — Welch t-test, bootstrap, and A/B comparison."""
-import pytest
+
 from evalflow.stats import (
     StatTestResult,
     bootstrap_test,

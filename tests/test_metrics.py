@@ -1,4 +1,5 @@
 """Tests for evalflow.metrics."""
+
 import pytest
 
 from evalflow.core import MetricResult, Scenario, SimulationTrace, StepResult, ToolCall
@@ -17,6 +18,7 @@ from evalflow.metrics.rubric import RubricMetric, _parse_judge_response
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_trace(
     tools: list[str],
     final_output: str | None = "answer",
@@ -24,12 +26,14 @@ def _make_trace(
 ) -> SimulationTrace:
     steps = []
     for i, tool in enumerate(tools):
-        steps.append(StepResult(
-            step_id=i,
-            input_state=f"obs_{i}",
-            action=ToolCall(tool_name=tool, arguments={}),
-            output_observation=f"result_{i}",
-        ))
+        steps.append(
+            StepResult(
+                step_id=i,
+                input_state=f"obs_{i}",
+                action=ToolCall(tool_name=tool, arguments={}),
+                output_observation=f"result_{i}",
+            )
+        )
     return SimulationTrace(
         scenario_id="t1",
         agent_id="test",
@@ -55,6 +59,7 @@ def scenario_with_expected():
 # ---------------------------------------------------------------------------
 # Deterministic metrics
 # ---------------------------------------------------------------------------
+
 
 class TestSuccessRate:
     def test_success(self, scenario_with_expected):
@@ -130,6 +135,7 @@ class TestLatencyMetric:
 # Metric Engine
 # ---------------------------------------------------------------------------
 
+
 class TestMetricEngine:
     def test_evaluates_all_metrics(self, scenario_with_expected):
         engine = MetricEngine([SuccessRate(), StepCount(), ExpectedToolUsage()])
@@ -151,6 +157,7 @@ class TestMetricEngine:
 # ---------------------------------------------------------------------------
 # Rubric metric (heuristic fallback)
 # ---------------------------------------------------------------------------
+
 
 class TestRubricMetricFallback:
     def test_heuristic_success(self, scenario_with_expected):

@@ -1,6 +1,7 @@
 """
 evalflow.simulator — Synchronous and asynchronous simulation engines.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -52,13 +53,15 @@ class SimulationEngine:
 
                 if action.tool_name.lower() == "done":
                     trace.final_output = action.arguments.get("answer", "")
-                    trace.steps.append(StepResult(
-                        step_id=i,
-                        timestamp=step_start,
-                        input_state=current_observation,
-                        action=action,
-                        output_observation="<TERMINATED>",
-                    ))
+                    trace.steps.append(
+                        StepResult(
+                            step_id=i,
+                            timestamp=step_start,
+                            input_state=current_observation,
+                            action=action,
+                            output_observation="<TERMINATED>",
+                        )
+                    )
                     break
 
                 try:
@@ -66,13 +69,15 @@ class SimulationEngine:
                 except Exception as e:
                     observation = f"Tool Execution Error: {e}"
 
-                trace.steps.append(StepResult(
-                    step_id=i,
-                    timestamp=step_start,
-                    input_state=current_observation,
-                    action=action,
-                    output_observation=observation,
-                ))
+                trace.steps.append(
+                    StepResult(
+                        step_id=i,
+                        timestamp=step_start,
+                        input_state=current_observation,
+                        action=action,
+                        output_observation=observation,
+                    )
+                )
                 current_observation = observation
 
         except Exception as e:
@@ -131,13 +136,15 @@ class AsyncSimulationEngine:
 
                 if action.tool_name.lower() == "done":
                     trace.final_output = action.arguments.get("answer", "")
-                    trace.steps.append(StepResult(
-                        step_id=i,
-                        timestamp=step_start,
-                        input_state=current_observation,
-                        action=action,
-                        output_observation="<TERMINATED>",
-                    ))
+                    trace.steps.append(
+                        StepResult(
+                            step_id=i,
+                            timestamp=step_start,
+                            input_state=current_observation,
+                            action=action,
+                            output_observation="<TERMINATED>",
+                        )
+                    )
                     break
 
                 try:
@@ -145,13 +152,15 @@ class AsyncSimulationEngine:
                 except Exception as e:
                     observation = f"Tool Execution Error: {e}"
 
-                trace.steps.append(StepResult(
-                    step_id=i,
-                    timestamp=step_start,
-                    input_state=current_observation,
-                    action=action,
-                    output_observation=observation,
-                ))
+                trace.steps.append(
+                    StepResult(
+                        step_id=i,
+                        timestamp=step_start,
+                        input_state=current_observation,
+                        action=action,
+                        output_observation=observation,
+                    )
+                )
                 current_observation = observation
 
         except Exception as e:

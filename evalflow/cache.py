@@ -4,6 +4,7 @@ evalflow.cache — Request caching and rate limiting for LLM API calls.
 Provides a disk-backed response cache (SQLite) and a token-bucket rate limiter
 to avoid redundant API calls and stay within provider rate limits.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -58,9 +59,7 @@ class ResponseCache:
     def get(self, model_id: str, messages: list, temperature: float) -> Optional[str]:
         key = self._make_key(model_id, messages, temperature)
         conn = sqlite3.connect(str(self.db_path))
-        row = conn.execute(
-            "SELECT response_json, created_at FROM cache WHERE cache_key=?", (key,)
-        ).fetchone()
+        row = conn.execute("SELECT response_json, created_at FROM cache WHERE cache_key=?", (key,)).fetchone()
         conn.close()  # explicit close for WAL mode
 
         if row is None:
@@ -165,4 +164,3 @@ class RateLimiter:
             "total_wait_time_s": round(self._total_wait_time, 2),
             "rate_rpm": self._rate * 60,
         }
-

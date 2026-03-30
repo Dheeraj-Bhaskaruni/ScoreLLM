@@ -2,6 +2,7 @@
 evalflow.metrics.rubric — LLM-as-a-Judge metric that scores agent traces
 against qualitative rubrics using a real LLM API call.
 """
+
 from __future__ import annotations
 
 import json
@@ -76,13 +77,13 @@ def _build_judge_prompt(
 - Name: {scenario.name}
 - Description: {scenario.description}
 - User Query: {scenario.initial_context}
-- Expected Tools: {scenario.expected_tool_sequence or 'not specified'}
+- Expected Tools: {scenario.expected_tool_sequence or "not specified"}
 
 ## Agent Trace
 - Agent: {trace.agent_id}
 - Steps: {len(trace.steps)}
-- Final Output: {trace.final_output or '(none)'}
-- Error: {trace.error or 'none'}
+- Final Output: {trace.final_output or "(none)"}
+- Error: {trace.error or "none"}
 
 ## Trajectory
 {trajectory}
@@ -136,7 +137,7 @@ class RubricMetric(Metric):
         self,
         name: str = "helpfulness",
         criteria: Optional[str] = None,
-        client: Any = None,          # openai.OpenAI instance
+        client: Any = None,  # openai.OpenAI instance
         model_id: str = "Qwen/Qwen2.5-7B-Instruct:together",
         temperature: float = 0.1,
     ):
@@ -175,7 +176,10 @@ class RubricMetric(Metric):
             completion = self._client.chat.completions.create(
                 model=self._model_id,
                 messages=[
-                    {"role": "system", "content": "You are a precise evaluation judge. Always respond with valid JSON only."},
+                    {
+                        "role": "system",
+                        "content": "You are a precise evaluation judge. Always respond with valid JSON only.",
+                    },
                     {"role": "user", "content": prompt},
                 ],
                 **token_kwargs,

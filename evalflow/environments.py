@@ -5,12 +5,13 @@ Provides a domain-aware MockEnvironment that returns realistic responses
 based on scenario metadata, with optional latency simulation and
 stochastic failures for stress testing.
 """
+
 from __future__ import annotations
 
 import ast
 import random
 import time
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from .core import Environment, Scenario, ToolCall
 
@@ -31,7 +32,7 @@ SEARCH_RESPONSES: Dict[str, Dict[str, str]] = {
         "default": "Financial data: Index up 2.3% this quarter. Earnings season shows mixed results across sectors.",
     },
     "technology": {
-        "iphone": "iPhone 16 Pro Max: A18 Pro chip, 48MP main camera, 6.9\" display, starts at $1,199.",
+        "iphone": 'iPhone 16 Pro Max: A18 Pro chip, 48MP main camera, 6.9" display, starts at $1,199.',
         "m4": "Apple M4 chip: 10-core CPU, 10-core GPU, 16-core Neural Engine. Geekbench 6 single-core: 3,810.",
         "vision": "Apple Vision Pro: Launched Feb 2024, estimated 500K units sold in first year, $3,499.",
         "ios": "iOS 19: Enhanced Siri with LLM, on-device AI features, redesigned Control Center, RCS support.",
@@ -148,11 +149,26 @@ class MockEnvironment(Environment):
         try:
             tree = ast.parse(expr, mode="eval")
             for node in ast.walk(tree):
-                if not isinstance(node, (
-                    ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant,
-                    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod, ast.Pow,
-                    ast.USub, ast.UAdd, ast.Call, ast.Name, ast.Tuple,
-                )):
+                if not isinstance(
+                    node,
+                    (
+                        ast.Expression,
+                        ast.BinOp,
+                        ast.UnaryOp,
+                        ast.Constant,
+                        ast.Add,
+                        ast.Sub,
+                        ast.Mult,
+                        ast.Div,
+                        ast.Mod,
+                        ast.Pow,
+                        ast.USub,
+                        ast.UAdd,
+                        ast.Call,
+                        ast.Name,
+                        ast.Tuple,
+                    ),
+                ):
                     return f"Error: Unsupported expression element: {type(node).__name__}"
 
             code = compile(tree, "<calc>", "eval")

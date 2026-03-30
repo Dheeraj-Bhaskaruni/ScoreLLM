@@ -1,11 +1,8 @@
 """Tests for evalflow.core Pydantic models."""
-import json
-import time
 
 import pytest
 
 from evalflow.core import (
-    Difficulty,
     EvaluationResult,
     MetricResult,
     RunConfig,
@@ -65,9 +62,24 @@ class TestSimulationTrace:
             scenario_id="t1",
             agent_id="a1",
             steps=[
-                StepResult(step_id=0, input_state="obs", action=ToolCall(tool_name="search", arguments={}), output_observation="result"),
-                StepResult(step_id=1, input_state="result", action=ToolCall(tool_name="calculate", arguments={}), output_observation="4"),
-                StepResult(step_id=2, input_state="4", action=ToolCall(tool_name="done", arguments={"answer": "4"}), output_observation="<TERMINATED>"),
+                StepResult(
+                    step_id=0,
+                    input_state="obs",
+                    action=ToolCall(tool_name="search", arguments={}),
+                    output_observation="result",
+                ),
+                StepResult(
+                    step_id=1,
+                    input_state="result",
+                    action=ToolCall(tool_name="calculate", arguments={}),
+                    output_observation="4",
+                ),
+                StepResult(
+                    step_id=2,
+                    input_state="4",
+                    action=ToolCall(tool_name="done", arguments={"answer": "4"}),
+                    output_observation="<TERMINATED>",
+                ),
             ],
         )
         assert trace.tool_sequence == ["search", "calculate"]

@@ -1,5 +1,4 @@
 """Tests for evalflow.data.generator."""
-import pytest
 
 from evalflow.data.generator import DOMAINS, EDGE_CASES, DatasetGenerator
 
@@ -81,6 +80,7 @@ class TestDomainCatalogue:
 class TestDatasetHash:
     def test_hash_deterministic(self):
         from evalflow.data.generator import DatasetGenerator
+
         gen = DatasetGenerator(seed=42)
         ds1 = gen.generate_synthetic_dataset(size=10)
         gen2 = DatasetGenerator(seed=42)
@@ -89,6 +89,7 @@ class TestDatasetHash:
 
     def test_different_data_different_hash(self):
         from evalflow.data.generator import DatasetGenerator
+
         gen1 = DatasetGenerator(seed=42)
         gen2 = DatasetGenerator(seed=99)
         ds1 = gen1.generate_synthetic_dataset(size=10)
@@ -99,5 +100,6 @@ class TestDatasetHash:
 class TestEdgeCaseSQLInjection:
     def test_sql_injection_scenario_exists(self):
         from evalflow.data.generator import EDGE_CASES
-        names = [e['name'] for e in EDGE_CASES]
-        assert 'SQL injection attempt' in names
+
+        names = [e["name"] for e in EDGE_CASES]
+        assert "SQL injection attempt" in names

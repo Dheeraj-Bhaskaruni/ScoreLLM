@@ -1,6 +1,7 @@
 """
 evalflow.metrics.metrics — Deterministic metrics for agent trace evaluation.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -13,8 +14,7 @@ class Metric(ABC):
     """Base class for all evaluation metrics."""
 
     @abstractmethod
-    def evaluate(self, trace: SimulationTrace, scenario: Scenario) -> float:
-        ...
+    def evaluate(self, trace: SimulationTrace, scenario: Scenario) -> float: ...
 
     @property
     def metric_name(self) -> str:
@@ -90,6 +90,7 @@ class LatencyMetric(Metric):
 # Engine
 # ---------------------------------------------------------------------------
 
+
 class MetricEngine:
     """Runs a suite of metrics over a trace and returns structured results."""
 
@@ -100,9 +101,7 @@ class MetricEngine:
         """Legacy dict-based interface for backward compatibility."""
         return {m.metric_name: m.evaluate(trace, scenario) for m in self.metrics}
 
-    def evaluate_trace_detailed(
-        self, trace: SimulationTrace, scenario: Scenario
-    ) -> Dict[str, MetricResult]:
+    def evaluate_trace_detailed(self, trace: SimulationTrace, scenario: Scenario) -> Dict[str, MetricResult]:
         """Returns MetricResult objects with scores + metadata."""
         results: Dict[str, MetricResult] = {}
         for m in self.metrics:

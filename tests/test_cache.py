@@ -1,7 +1,7 @@
 """Tests for evalflow.cache — response caching and rate limiting."""
+
 import os
 import tempfile
-import time
 
 import pytest
 

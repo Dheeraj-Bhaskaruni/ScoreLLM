@@ -4,6 +4,7 @@ evalflow.agents.hf_agent — Local Hugging Face model agent.
 Demonstrates PyTorch/Transformers integration for on-device inference
 within the evaluation harness.
 """
+
 from __future__ import annotations
 
 import logging
@@ -56,7 +57,7 @@ class HuggingFaceAgent(Agent):
             )
 
         generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        new_text = generated_text[len(prompt):].strip()
+        new_text = generated_text[len(prompt) :].strip()
 
         return self._parse_output(new_text, history)
 

@@ -5,6 +5,7 @@ Replaces flat JSON file storage with a proper relational backend. Uses Python's
 built-in sqlite3 module (zero extra dependencies). Supports concurrent reads,
 atomic writes, and efficient querying across thousands of runs.
 """
+
 from __future__ import annotations
 
 import json
@@ -114,8 +115,7 @@ class StorageBackend:
                 """INSERT INTO runs (run_id, agent_id, model_name, status, config_json,
                    dataset_hash, created_at, updated_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (run_id, agent_id, model_name or "", status,
-                 json.dumps(config), dataset_hash, now, now),
+                (run_id, agent_id, model_name or "", status, json.dumps(config), dataset_hash, now, now),
             )
 
     def update_run(
@@ -133,8 +133,16 @@ class StorageBackend:
                 """UPDATE runs SET status=?, total_scenarios=?, completed=?, failed=?,
                    duration_seconds=?, aggregate_metrics_json=?, updated_at=?
                    WHERE run_id=?""",
-                (status, total_scenarios, completed, failed, duration_seconds,
-                 json.dumps(aggregate_metrics or {}), time.time(), run_id),
+                (
+                    status,
+                    total_scenarios,
+                    completed,
+                    failed,
+                    duration_seconds,
+                    json.dumps(aggregate_metrics or {}),
+                    time.time(),
+                    run_id,
+                ),
             )
 
     def get_run(self, run_id: str) -> Optional[Dict[str, Any]]:
@@ -152,9 +160,7 @@ class StorageBackend:
                     (model_name, limit),
                 ).fetchall()
             else:
-                rows = conn.execute(
-                    "SELECT * FROM runs ORDER BY created_at DESC LIMIT ?", (limit,)
-                ).fetchall()
+                rows = conn.execute("SELECT * FROM runs ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
         return [self._row_to_run(r) for r in rows]
 
     def delete_run(self, run_id: str) -> bool:
@@ -281,5 +287,6 @@ class StorageBackend:
             "dataset_hash": row["dataset_hash"],
             "created_at": row["created_at"],
         }
+
 
 __all__ = ["StorageBackend"]

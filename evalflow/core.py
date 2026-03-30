@@ -3,6 +3,7 @@ evalflow.core — Domain models and abstract interfaces for the EvalFlow framewo
 
 All models use Pydantic for validation, serialization, and type safety.
 """
+
 from __future__ import annotations
 
 import time
@@ -17,6 +18,7 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
+
 
 class Difficulty(str, Enum):
     EASY = "easy"
@@ -35,8 +37,10 @@ class RunStatus(str, Enum):
 # Core value objects
 # ---------------------------------------------------------------------------
 
+
 class ToolCall(BaseModel):
     """A single tool invocation by an agent, capturing name, args, and raw LLM output."""
+
     tool_name: str
     arguments: Dict[str, Any] = Field(default_factory=dict)
     raw_output: Optional[str] = None
@@ -44,6 +48,7 @@ class ToolCall(BaseModel):
 
 class StepResult(BaseModel):
     """One step in an agent-environment interaction loop."""
+
     step_id: int
     timestamp: float = Field(default_factory=time.time)
     input_state: str
@@ -54,6 +59,7 @@ class StepResult(BaseModel):
 
 class Scenario(BaseModel):
     """A test-case definition that drives a single simulation."""
+
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
     name: str
     description: str
@@ -78,6 +84,7 @@ class Scenario(BaseModel):
 
 class SimulationTrace(BaseModel):
     """Complete record of a single agent-environment simulation run."""
+
     scenario_id: str
     agent_id: str
     start_time: float = Field(default_factory=time.time)
@@ -97,6 +104,7 @@ class SimulationTrace(BaseModel):
 
 class MetricResult(BaseModel):
     """Result of a single metric evaluation."""
+
     name: str
     score: float
     explanation: Optional[str] = None
@@ -105,6 +113,7 @@ class MetricResult(BaseModel):
 
 class EvaluationResult(BaseModel):
     """Aggregated evaluation for one scenario run."""
+
     scenario: Scenario
     trace: SimulationTrace
     metrics: Dict[str, MetricResult] = Field(default_factory=dict)
@@ -112,6 +121,7 @@ class EvaluationResult(BaseModel):
 
 class RunConfig(BaseModel):
     """Configuration for an evaluation run — captures the 'what' and 'how'."""
+
     run_id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
     agent_id: str = "unknown"
     model_name: Optional[str] = None
@@ -125,6 +135,7 @@ class RunConfig(BaseModel):
 
 class RunSummary(BaseModel):
     """Top-level summary persisted after each evaluation run."""
+
     config: RunConfig
     status: RunStatus = RunStatus.PENDING
     total_scenarios: int = 0
@@ -138,6 +149,7 @@ class RunSummary(BaseModel):
 # ---------------------------------------------------------------------------
 # Abstract interfaces
 # ---------------------------------------------------------------------------
+
 
 class Agent(ABC):
     """Abstract base class for the system under test (SUT)."""
@@ -156,8 +168,7 @@ class AsyncAgent(ABC):
     """Async variant for agents backed by API calls."""
 
     @abstractmethod
-    async def act(self, history: List[StepResult], current_observation: str) -> ToolCall:
-        ...
+    async def act(self, history: List[StepResult], current_observation: str) -> ToolCall: ...
 
     @property
     def agent_id(self) -> str:

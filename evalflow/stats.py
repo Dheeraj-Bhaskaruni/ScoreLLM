@@ -5,15 +5,17 @@ Provides confidence intervals, p-values, and effect sizes to determine whether
 observed metric differences are statistically meaningful or just noise.
 Uses scipy when available, falls back to bootstrap estimation otherwise.
 """
+
 from __future__ import annotations
 
 import math
 import random
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 try:
     from scipy import stats as scipy_stats
+
     HAS_SCIPY = True
 except ImportError:
     HAS_SCIPY = False
@@ -22,6 +24,7 @@ except ImportError:
 @dataclass
 class StatTestResult:
     """Result of a statistical significance test between two groups."""
+
     metric_name: str
     mean_a: float
     mean_b: float
@@ -59,7 +62,7 @@ def _cohens_d(mean_a: float, mean_b: float, std_a: float, std_b: float, n_a: int
     """Compute Cohen's d effect size with pooled standard deviation."""
     if n_a + n_b < 4:
         return 0.0
-    pooled = math.sqrt(((n_a - 1) * std_a ** 2 + (n_b - 1) * std_b ** 2) / (n_a + n_b - 2))
+    pooled = math.sqrt(((n_a - 1) * std_a**2 + (n_b - 1) * std_b**2) / (n_a + n_b - 2))
     if pooled == 0:
         return 0.0
     return (mean_b - mean_a) / pooled
@@ -87,11 +90,11 @@ def welch_t_test(
     t_stat, p_value = scipy_stats.ttest_ind(scores_a, scores_b, equal_var=False)
 
     # Confidence interval for the difference in means
-    se = math.sqrt(std_a ** 2 / n_a + std_b ** 2 / n_b) if n_a > 0 and n_b > 0 else 0
+    se = math.sqrt(std_a**2 / n_a + std_b**2 / n_b) if n_a > 0 and n_b > 0 else 0
     # Welch-Satterthwaite degrees of freedom
     if se > 0:
-        df_num = (std_a ** 2 / n_a + std_b ** 2 / n_b) ** 2
-        df_den = (std_a ** 2 / n_a) ** 2 / max(n_a - 1, 1) + (std_b ** 2 / n_b) ** 2 / max(n_b - 1, 1)
+        df_num = (std_a**2 / n_a + std_b**2 / n_b) ** 2
+        df_den = (std_a**2 / n_a) ** 2 / max(n_a - 1, 1) + (std_b**2 / n_b) ** 2 / max(n_b - 1, 1)
         df = df_num / df_den if df_den > 0 else 1
         t_crit = scipy_stats.t.ppf(1 - alpha / 2, df)
         ci_lower = delta - t_crit * se
@@ -138,10 +141,20 @@ def bootstrap_test(
 
     if n_a == 0 or n_b == 0:
         return StatTestResult(
-            metric_name=metric_name, mean_a=mean_a, mean_b=mean_b,
-            delta=observed_delta, std_a=std_a, std_b=std_b,
-            p_value=1.0, ci_lower=0.0, ci_upper=0.0, effect_size=0.0,
-            n_a=n_a, n_b=n_b, significant=False, method="bootstrap",
+            metric_name=metric_name,
+            mean_a=mean_a,
+            mean_b=mean_b,
+            delta=observed_delta,
+            std_a=std_a,
+            std_b=std_b,
+            p_value=1.0,
+            ci_lower=0.0,
+            ci_upper=0.0,
+            effect_size=0.0,
+            n_a=n_a,
+            n_b=n_b,
+            significant=False,
+            method="bootstrap",
         )
 
     # Bootstrap: resample with replacement and compute mean differences
@@ -240,5 +253,6 @@ def _effect_label(d: float) -> str:
     if d < 0.8:
         return "medium"
     return "large"
+
 
 __all__ = ["welch_t_test", "bootstrap_test", "compare_ab_scores", "format_stat_table", "StatTestResult"]

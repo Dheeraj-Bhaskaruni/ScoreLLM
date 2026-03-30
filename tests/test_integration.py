@@ -1,9 +1,7 @@
 """Integration tests — full pipeline end-to-end."""
-import json
-import tempfile
-from pathlib import Path
 
-import pytest
+import json
+
 
 from evalflow.core import EvaluationResult, MetricResult, RunConfig
 from evalflow.data.generator import DatasetGenerator
@@ -13,7 +11,6 @@ from evalflow.metrics.metrics import (
     MetricEngine,
     StepCount,
     SuccessRate,
-    ToolSequenceAccuracy,
 )
 from evalflow.metrics.rubric import RubricMetric
 from evalflow.simulator import SimulationEngine
@@ -100,7 +97,7 @@ class TestFullPipeline:
 
     def test_serialization_roundtrip(self):
         """Ensure results can be serialized to JSON and back."""
-        scenario = scenarios = DatasetGenerator(seed=42).generate_synthetic_dataset(size=1)[0]
+        scenario = DatasetGenerator(seed=42).generate_synthetic_dataset(size=1)[0]
         trace = SimulationEngine(
             environment=MockEnvironment(),
         ).run_scenario(

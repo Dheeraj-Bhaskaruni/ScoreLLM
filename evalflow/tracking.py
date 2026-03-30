@@ -4,6 +4,7 @@ evalflow.tracking — Lightweight experiment tracking.
 Persists each run as a JSON file under runs/ with full config, aggregate
 metrics, and per-scenario results.  Supports comparing two runs side-by-side.
 """
+
 from __future__ import annotations
 
 import json
@@ -11,7 +12,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from .core import (
     EvaluationResult,
@@ -111,17 +112,19 @@ class ExperimentTracker:
             try:
                 with open(p) as f:
                     data = json.load(f)
-                runs.append({
-                    "run_id": data["config"]["run_id"],
-                    "agent_id": data["config"].get("agent_id", ""),
-                    "model_name": data["config"].get("model_name", ""),
-                    "status": data.get("status", ""),
-                    "total": data.get("total_scenarios", 0),
-                    "completed": data.get("completed", 0),
-                    "failed": data.get("failed", 0),
-                    "duration_s": data.get("duration_seconds", 0),
-                    "metrics": data.get("aggregate_metrics", {}),
-                })
+                runs.append(
+                    {
+                        "run_id": data["config"]["run_id"],
+                        "agent_id": data["config"].get("agent_id", ""),
+                        "model_name": data["config"].get("model_name", ""),
+                        "status": data.get("status", ""),
+                        "total": data.get("total_scenarios", 0),
+                        "completed": data.get("completed", 0),
+                        "failed": data.get("failed", 0),
+                        "duration_s": data.get("duration_seconds", 0),
+                        "metrics": data.get("aggregate_metrics", {}),
+                    }
+                )
             except Exception as e:
                 logger.warning("Skipping corrupt run file %s: %s", p, e)
         return runs

@@ -1,5 +1,4 @@
 """Tests for evalflow.simulator."""
-import pytest
 
 from evalflow.environments import MockEnvironment
 from evalflow.simulator import SimulationEngine
@@ -95,7 +94,9 @@ class TestMockEnvironment:
         from evalflow.core import ToolCall
 
         mock_env.reset(simple_scenario)
-        result = mock_env.execute(ToolCall(tool_name="calculate", arguments={"expression": "__import__('os').system('ls')"}))
+        result = mock_env.execute(
+            ToolCall(tool_name="calculate", arguments={"expression": "__import__('os').system('ls')"})
+        )
         assert "Error" in result
 
     def test_unknown_tool(self, simple_scenario, mock_env):
